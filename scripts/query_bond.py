@@ -92,7 +92,13 @@ class BondMonitor:
             content_lines.append(bond_info)
 
         content = ''.join(content_lines)
-        title = f"📢 新债提醒 ({self.today})"
+
+        # 标题直接显示新债数量
+        count = len(df)
+        if count == 1:
+            title = f"✅ 今日有1只新债申购"
+        else:
+            title = f"✅ 今日有{count}只新债申购"
 
         return title, content
 
@@ -145,7 +151,7 @@ class BondMonitor:
             # 发送每日状态通知（可选）
             import os
             if os.getenv('SEND_DAILY_STATUS', 'false').lower() == 'true':
-                status_title = "新债监控日报"
+                status_title = "❌ 今日无新债申购"
                 status_content = f"""
 **日期**: {self.today}
 
