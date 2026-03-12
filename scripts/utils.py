@@ -2,6 +2,7 @@ import os
 import json
 from datetime import datetime, timedelta
 import pandas as pd
+import requests
 
 
 def get_today():
@@ -56,3 +57,31 @@ def compare_bonds(new_bonds, old_bonds):
     if '债券代码' in new_bonds.columns:
         return new_bonds[new_bonds['债券代码'].isin(added_codes)]
     return new_bonds
+
+
+def send_serverchan(title, content, sendkey):
+    """通过 Server酱发送消息到个人微信"""
+    if not sendkey:
+        print("⚠️ Server酱 SendKey 未配置，跳过推送")
+        return False
+    
+    url = f"https://sctapi.ftqq.com/{sendkey}.send"
+    data = {
+        "title": title,
+        "desp": content
+    }
+    
+    try:
+        response = requests.post(url, data=data, timeout=10)
+        result = response.json()
+        
+        if result.get("code") == 0:
+            print(f"✅ Server酱推送成功: {title}")
+            return True
+        else:
+            print(f"❌ Server酱推送失败: {result}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Server酱推送异常: {e}")
+        return False

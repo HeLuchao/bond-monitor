@@ -9,13 +9,14 @@ import pandas as pd
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 import akshare as ak
-from utils import get_today, get_yesterday, save_data, load_data, format_bond_info, compare_bonds
+from utils import get_today, get_yesterday, save_data, load_data, format_bond_info, compare_bonds, send_serverchan
 from config import Config
 
 
 class BondMonitor:
     def __init__(self):
         self.webhook_url = Config.WECHAT_WEBHOOK_URL
+        self.serverchan_sendkey = Config.SERVERCHAN_SENDKEY
         self.today = get_today()
         self.yesterday = get_yesterday()
 
@@ -122,12 +123,22 @@ class BondMonitor:
         # 6. 发送消息提醒
         if added_bonds is not None and not added_bonds.empty:
             title, content = self.generate_bond_message(added_bonds)
+            
+            # 推送到企业微信群
             success = self.send_wechat_message(title, content)
+
+            # 推送到个人微信（Server酱）
+            plain_content = content.replace('> ', '').replace('---', '').replace('\n\n', '\n')
+            send_serverchan(
+                title=title.replace('📢 ', ''),
+                content=plain_content.strip(),
+                sendkey=self.serverchan_sendkey
+            )
 
             if success:
                 print(f"[{datetime.now()}] 成功推送 {len(added_bonds)} 条新债信息")
             else:
-                print(f"[{datetime.now()}] 消息推送失败")
+                print(f"[{datetime.now()}] 企业微信消息推送失败")
         else:
             print(f"[{datetime.now()}] 今日无新债，无需推送")
 

@@ -7,6 +7,9 @@ class Config:
     # 企业微信 Webhook URL
     WECHAT_WEBHOOK_URL = os.getenv('WECHAT_WEBHOOK_URL')
 
+    # Server酱 SendKey（推送到个人微信）
+    SERVERCHAN_SENDKEY = os.getenv('SERVERCHAN_SENDKEY')
+
     # 数据存储路径
     DATA_DIR = 'data'
     LOGS_DIR = 'logs'
