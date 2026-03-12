@@ -123,7 +123,7 @@ class BondMonitor:
         # 6. 发送消息提醒
         if added_bonds is not None and not added_bonds.empty:
             title, content = self.generate_bond_message(added_bonds)
-            
+
             # 推送到企业微信群
             success = self.send_wechat_message(title, content)
 
@@ -141,6 +141,39 @@ class BondMonitor:
                 print(f"[{datetime.now()}] 企业微信消息推送失败")
         else:
             print(f"[{datetime.now()}] 今日无新债，无需推送")
+
+            # 发送每日状态通知（可选）
+            import os
+            if os.getenv('SEND_DAILY_STATUS', 'false').lower() == 'true':
+                status_title = "新债监控日报"
+                status_content = f"""
+**日期**: {self.today}
+
+**数据统计**:
+- 总债券数量: {len(df) if df is not None else 0}
+- 今日申购: 0
+- 明日申购: 0
+
+**最近申购债券**:
+"""
+
+                # 获取最近3只债券
+                if df is not None and not df.empty:
+                    recent = df.sort_values('申购日期', ascending=False).head(3)
+                    for _, row in recent.iterrows():
+                        status_content += f"""
+- {row.get('债券简称', 'N/A')} ({row.get('债券代码', 'N/A')})
+  申购日期: {row.get('申购日期', 'N/A')}
+"""
+
+                status_content += "\n---\n💡 系统运行正常，暂无新债申购"
+
+                send_serverchan(
+                    title=status_title,
+                    content=status_content.strip(),
+                    sendkey=self.serverchan_sendkey
+                )
+                print(f"[{datetime.now()}] 已发送每日状态通知")
 
         print(f"\n{'='*50}")
         print(f"[{datetime.now()}] 任务执行完成")
