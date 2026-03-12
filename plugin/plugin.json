@@ -1,0 +1,146 @@
+{
+  "name": "bond-monitor",
+  "version": "1.0.0",
+  "displayName": "新债监控",
+  "description": "自动查询可转债申购信息，通过微信推送新债提醒",
+  "author": {
+    "name": "HeLuchao",
+    "email": "heluchao@example.com",
+    "url": "https://github.com/HeLuchao"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/HeLuchao/bond-monitor.git"
+  },
+  "bugs": {
+    "url": "https://github.com/HeLuchao/bond-monitor/issues"
+  },
+  "homepage": "https://github.com/HeLuchao/bond-monitor#readme",
+  "keywords": [
+    "可转债",
+    "债券监控",
+    "债券申购",
+    "微信推送",
+    "Server酱",
+    "投资理财",
+    "金融",
+    "自动化",
+    "通知提醒"
+  ],
+  "category": "finance",
+  "icon": "icon.png",
+  "readme": "README.md",
+  "changelog": "CHANGELOG.md",
+  "settings": {
+    "serverchan_sendkey": {
+      "type": "string",
+      "title": "Server酱 SendKey",
+      "description": "用于推送消息到个人微信的 SendKey，从 https://sct.ftqq.com/ 获取",
+      "placeholder": "SCTxxxxxxxxxxxxxxxxxxxxxxxx",
+      "required": true,
+      "validation": {
+        "pattern": "^SCT[a-zA-Z0-9]{30,}$",
+        "message": "SendKey 格式不正确，应以 SCT 开头"
+      }
+    },
+    "send_daily_status": {
+      "type": "boolean",
+      "title": "每日状态通知",
+      "description": "启用后，即使无新债申购也会发送每日状态通知",
+      "default": false,
+      "required": false
+    },
+    "push_time": {
+      "type": "string",
+      "title": "推送时间",
+      "description": "定时推送时间（格式：HH:MM，如 09:00）",
+      "default": "09:00",
+      "required": false,
+      "validation": {
+        "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$",
+        "message": "时间格式不正确，请使用 HH:MM 格式（如 09:00）"
+      }
+    }
+  },
+  "outputs": {
+    "bonds_count": {
+      "type": "number",
+      "title": "债券总数",
+      "description": "查询到的债券总数量"
+    },
+    "new_bonds_count": {
+      "type": "number",
+      "title": "新债数量",
+      "description": "今日/明日申购的新债数量"
+    },
+    "push_status": {
+      "type": "string",
+      "title": "推送状态",
+      "description": "消息推送状态",
+      "enum": ["success", "failed", "no_bonds"]
+    },
+    "push_message": {
+      "type": "string",
+      "title": "推送消息",
+      "description": "推送的消息内容摘要"
+    }
+  },
+  "examples": [
+    {
+      "name": "基础使用",
+      "description": "最简单的配置方式",
+      "settings": {
+        "serverchan_sendkey": "SCTxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "name": "每日通知",
+      "description": "启用每日状态通知",
+      "settings": {
+        "serverchan_sendkey": "SCTxxxxxxxxxxxxxxxxxxxxxxxx",
+        "send_daily_status": true
+      }
+    },
+    {
+      "name": "自定义时间",
+      "description": "设置推送时间",
+      "settings": {
+        "serverchan_sendkey": "SCTxxxxxxxxxxxxxxxxxxxxxxxx",
+        "send_daily_status": true,
+        "push_time": "08:30"
+      }
+    }
+  ],
+  "compatibility": {
+    "platform": ["linux", "macos", "windows"],
+    "runtime": "docker",
+    "minDockerVersion": "20.10.0"
+  },
+  "maintainer": {
+    "name": "HeLuchao",
+    "email": "heluchao@example.com"
+  },
+  "contributors": [
+    {
+      "name": "HeLuchao",
+      "url": "https://github.com/HeLuchao"
+    }
+  ],
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/HeLuchao/bond-monitor"
+  },
+  "badges": [
+    {
+      "name": "GitHub Stars",
+      "url": "https://img.shields.io/github/stars/HeLuchao/bond-monitor?style=social",
+      "href": "https://github.com/HeLuchao/bond-monitor"
+    },
+    {
+      "name": "License",
+      "url": "https://img.shields.io/github/license/HeLuchao/bond-monitor",
+      "href": "https://github.com/HeLuchao/bond-monitor/blob/main/LICENSE"
+    }
+  ]
+}
