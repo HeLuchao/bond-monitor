@@ -25,8 +25,8 @@ class BondMonitor:
         print(f"[{datetime.now()}] 开始获取新债数据...")
 
         try:
-            # 使用 AkShare 获取东方财富新债数据
-            df = ak.bond_new_issue_em()
+            # 使用 AkShare 获取可转债数据
+            df = ak.bond_zh_cov()
             print(f"[{datetime.now()}] 成功获取 {len(df)} 条债券数据")
             return df
         except Exception as e:
@@ -34,16 +34,16 @@ class BondMonitor:
             return None
 
     def filter_new_bonds(self, df):
-        """过滤出今日或昨日的新债"""
+        """过滤出今日或明日申购的新债"""
         if df is None or df.empty:
             return None
 
-        # 筛选发行日期为今天或明天的债券
-        df['发行日期'] = pd.to_datetime(df['发行日期'])
+        # 筛选申购日期为今天或明天的债券
+        df['申购日期'] = pd.to_datetime(df['申购日期'])
         tomorrow = (datetime.now() + pd.Timedelta(days=1)).strftime('%Y-%m-%d')
 
         # 筛选条件
-        mask = (df['发行日期'].dt.strftime('%Y-%m-%d').isin([self.today, tomorrow]))
+        mask = (df['申购日期'].dt.strftime('%Y-%m-%d').isin([self.today, tomorrow]))
         new_bonds = df[mask]
 
         print(f"[{datetime.now()}] 筛选出 {len(new_bonds)} 条新债")

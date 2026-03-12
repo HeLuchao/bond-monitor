@@ -26,6 +26,7 @@ jobs:
       - name: Run bond query script
         env:
           WECHAT_WEBHOOK_URL: ${{ secrets.WECHAT_WEBHOOK_URL }}
+          SERVERCHAN_SENDKEY: ${{ secrets.SERVERCHAN_SENDKEY }}
         run: |
           python scripts/query_bond.py
 
