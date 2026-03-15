@@ -2,9 +2,23 @@ name: Daily Bond Query
 
 on:
   schedule:
-    # 每天 UTC 1:00 执行（北京时间 9:00）
-    - cron: '0 1 * * *'
+    # 每天 UTC 0:00 执行（北京时间 8:00）
+    # 如需修改推送时间，请通过仓库 Secrets 设置 PUSH_HOUR 和 PUSH_MINUTE
+    # 注意：cron 使用 UTC 时间，北京时间 = UTC + 8
+    # 例：北京时间 8:00  → UTC 0:00  → cron: '0 0 * * *'
+    #     北京时间 9:00  → UTC 1:00  → cron: '0 1 * * *'
+    #     北京时间 10:00 → UTC 2:00  → cron: '0 2 * * *'
+    - cron: '0 0 * * *'
   workflow_dispatch:  # 支持手动触发
+    inputs:
+      push_hour:
+        description: '推送小时（北京时间，0-23，留空使用默认值 8）'
+        required: false
+        default: ''
+      push_minute:
+        description: '推送分钟（0-59，留空使用默认值 0）'
+        required: false
+        default: ''
 
 jobs:
   query-and-push:
@@ -23,12 +37,37 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Determine push time
+        id: push_time
+        run: |
+          # 优先级：手动触发输入 > Secret 配置 > 默认值(8:00)
+          PUSH_HOUR="${{ github.event.inputs.push_hour }}"
+          PUSH_MINUTE="${{ github.event.inputs.push_minute }}"
+
+          if [ -z "$PUSH_HOUR" ]; then
+            PUSH_HOUR="${{ secrets.PUSH_HOUR }}"
+          fi
+          if [ -z "$PUSH_MINUTE" ]; then
+            PUSH_MINUTE="${{ secrets.PUSH_MINUTE }}"
+          fi
+
+          # 如果都为空，使用默认值
+          PUSH_HOUR="${PUSH_HOUR:-8}"
+          PUSH_MINUTE="${PUSH_MINUTE:-0}"
+
+          # 格式化为 HH:MM
+          PUSH_TIME=$(printf "%02d:%02d" "$PUSH_HOUR" "$PUSH_MINUTE")
+          echo "push_time=$PUSH_TIME" >> $GITHUB_OUTPUT
+          echo "当前推送时间（北京时间）：$PUSH_TIME"
+
       - name: Run bond query script
         env:
           WECHAT_WEBHOOK_URL: ${{ secrets.WECHAT_WEBHOOK_URL }}
           SERVERCHAN_SENDKEY: ${{ secrets.SERVERCHAN_SENDKEY }}
           SEND_DAILY_STATUS: ${{ secrets.SEND_DAILY_STATUS || 'false' }}
+          PUSH_TIME: ${{ steps.push_time.outputs.push_time }}
         run: |
+          echo "推送时间（北京时间）：$PUSH_TIME"
           python scripts/query_bond.py
 
       - name: Upload logs

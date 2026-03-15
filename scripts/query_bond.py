@@ -104,8 +104,12 @@ class BondMonitor:
 
     def run(self):
         """执行监控任务"""
+        push_time = Config.get_push_time()
         print(f"\n{'='*50}")
         print(f"[{datetime.now()}] 开始执行新债监控任务")
+        print(f"[配置] 推送时间（北京时间）：{push_time}")
+        print(f"[配置] Server酱 SendKey：{'已配置' if self.serverchan_sendkey else '未配置'}")
+        print(f"[配置] 企业微信 Webhook：{'已配置' if self.webhook_url else '未配置'}")
         print(f"{'='*50}\n")
 
         # 1. 获取债券数据
