@@ -12,7 +12,7 @@
 - 📱 **微信推送**：直接推送到个人微信，无需群聊
 - 🎯 **智能筛选**：只推送今日/明日申购的新债
 - 💡 **直观标题**：标题直接显示是否有新债，无需点进消息
-- 🕘 **定时执行**：每天北京时间 9:00 自动推送
+- 🕗 **定时执行**：每天北京时间 8:00 自动推送（可自由配置）
 - 💰 **完全免费**：基于 GitHub Actions + Server酱，零成本运行
 - 📈 **数据完整**：包含申购代码、发行规模、转股价、信用评级等关键信息
 
@@ -116,6 +116,8 @@ python scripts/query_bond.py
 |------------|------|--------|
 | `SEND_DAILY_STATUS` | 是否发送每日状态通知（无新债时也推送） | `false` |
 | `WECHAT_WEBHOOK_URL` | 企业微信群机器人 Webhook（多人推送用） | 无 |
+| `PUSH_HOUR` | 推送时间：小时（北京时间，0-23） | `8` |
+| `PUSH_MINUTE` | 推送时间：分钟（0-59） | `0` |
 
 ### 推送方式对比
 
@@ -126,7 +128,7 @@ python scripts/query_bond.py
 
 ## 📅 定时任务
 
-- **执行时间**：每天北京时间 9:00（UTC 1:00）
+- **执行时间**：每天北京时间 8:00（UTC 0:00），可自由配置
 - **推送条件**：
   - 默认：有新债申购时推送
   - 可选：配置 `SEND_DAILY_STATUS=true` 每天推送状态通知
@@ -230,17 +232,28 @@ WECHAT_WEBHOOK_URL=https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=xxx
 
 ### Q4: 推送时间可以修改吗？
 
-**A**: 可以！编辑 `.github/workflows/daily-query.yml`：
+**A**: 可以！支持三种配置方式，优先级从高到低：
 
-```yaml
-on:
-  schedule:
-    - cron: '0 1 * * *'  # UTC 时间，对应北京时间 9:00
+**方式一：手动触发时临时指定**（一次性测试）
+
+在 GitHub Actions 页面点击 "Run workflow"，填入 `push_hour` 和 `push_minute` 参数即可。
+
+**方式二：通过仓库 Secrets 永久配置**（推荐）
+
+进入 `Settings` → `Secrets and variables` → `Actions`，添加：
+- `PUSH_HOUR` = `8`（想推送的小时，北京时间 0-23）
+- `PUSH_MINUTE` = `0`（想推送的分钟 0-59）
+
+> 注意：以上 Secrets 会改变脚本的推送时间说明，若同时需要调整 cron 触发时间，还需修改 `.github/workflows/daily-query.yml` 中的 cron 表达式（北京时间 = UTC + 8）：
+> - `0 0 * * *` → 北京时间 08:00（默认）
+> - `0 1 * * *` → 北京时间 09:00
+> - `30 1 * * *` → 北京时间 09:30
+
+**方式三：本地 `.env` 文件**（本地测试用）
+
+```env
+PUSH_TIME=08:00
 ```
-
-修改为其他时间，例如：
-- `0 0 * * *` - UTC 0:00 = 北京时间 8:00
-- `0 2 * * *` - UTC 2:00 = 北京时间 10:00
 
 ### Q5: 可以推送到企业微信群吗？
 
@@ -260,6 +273,11 @@ on:
 ## 🤝 贡献
 
 欢迎提交 Issue 和 Pull Request！
+
+如有问题或建议，也可通过以下方式联系：
+
+- **Email**：heluchao1994@gmail.com
+- **GitHub**：https://github.com/HeLuchao
 
 ## 📝 许可证
 
