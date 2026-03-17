@@ -86,3 +86,29 @@ jobs:
           name: data-${{ github.run_number }}
           path: data/
           retention-days: 7
+
+  # Keep-alive job: 每月 1 日自动重新启用 scheduled workflow
+  # GitHub 会在仓库 60 天无活动后自动禁用 scheduled workflow
+  # 此 job 通过定期提交空 commit 保持仓库活跃，防止 schedule 被禁用
+  keep-alive:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Keep workflow alive
+        run: |
+          # 每月 1 日执行一次空提交，保持仓库活跃度
+          DAY=$(date -u +%d)
+          if [ "$DAY" = "01" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git commit --allow-empty -m "chore: keep workflow alive [skip ci]"
+            git push
+            echo "Keep-alive commit pushed."
+          else
+            echo "Not the 1st of the month, skipping keep-alive commit."
+          fi
