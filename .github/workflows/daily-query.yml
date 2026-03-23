@@ -2,14 +2,15 @@ name: Daily Bond Query
 
 on:
   schedule:
-    # 每天 UTC 0:05 执行（北京时间 8:05）
-    # 注意：整点（如 0:00）高峰期延迟严重，错开 5 分钟可显著提升可靠性
+    # 每天 UTC 22:00 执行（北京时间次日 6:00）
+    # 由于 GitHub Actions schedule 高峰期延迟可达 2 小时，提前到 6:00 触发
+    # 实际收到通知时间大约在北京时间 6:00~8:30 之间
     # 如需修改推送时间，请通过仓库 Secrets 设置 PUSH_HOUR 和 PUSH_MINUTE
-    # 注意：cron 使用 UTC 时间，北京时间 = UTC + 8
-    # 例：北京时间 8:05  → UTC 0:05  → cron: '5 0 * * *'（当前配置）
-    #     北京时间 9:00  → UTC 1:00  → cron: '0 1 * * *'
-    #     北京时间 10:00 → UTC 2:00  → cron: '0 2 * * *'
-    - cron: '5 0 * * *'
+    # cron 换算：北京时间 = UTC + 8（跨天时注意日期进退）
+    # 例：北京时间 6:00  → UTC 22:00（前一天） → cron: '0 22 * * *'（当前配置）
+    #     北京时间 8:00  → UTC 0:00            → cron: '0 0 * * *'
+    #     北京时间 9:00  → UTC 1:00            → cron: '0 1 * * *'
+    - cron: '0 22 * * *'
   workflow_dispatch:  # 支持手动触发
     inputs:
       push_hour:
